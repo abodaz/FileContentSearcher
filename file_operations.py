@@ -3,11 +3,6 @@ import io
 from contextlib import redirect_stdout
 
 
-def get_user_input():
-    user_input = input("Enter a list of strings separated by commas: ")
-    return [item.strip() for item in user_input.split(",")]
-
-
 def get_files_has_entered_word(word, directory_path):
     file_results = []
     try:
@@ -39,7 +34,6 @@ def get_files_has_element_or_more(elements, files):
 
 
 def capture_printed_output(func, *args, **kwargs):
-    # Capture printed output as a string
     with io.StringIO() as output:
         with redirect_stdout(output):
             func(*args, **kwargs)
@@ -48,7 +42,6 @@ def capture_printed_output(func, *args, **kwargs):
 
 
 def print_elements_found(elements, file_results):
-    # Print elements found in the directory
     output = io.StringIO()
     for element in elements:
         files_with_element = [file for file, matched_elements in file_results.items() if element in matched_elements]
@@ -65,50 +58,23 @@ def print_elements_found(elements, file_results):
 
 
 def print_files_with_elements(file_results):
-    # Print files and the elements they contain
     output = io.StringIO()
     print("\nFiles containing at least one not handled json fields", file=output)
     files_with_elements = []
+    filenames = []
     for file, matched_elements in file_results.items():
         files_with_elements.append(file)
+        filename = os.path.basename(file)
+        filenames.append(filename)
         print(f"File: {file}", file=output)
         print("Contains elements:", file=output)
         for element in matched_elements:
             print(f"  - {element}", file=output)
 
+    print("\nSummary of filenames:", file=output)
+    for filename in filenames:
+        print(filename, file=output)
+
     printed_output = output.getvalue()
     output.close()
-    return printed_output
-
-
-def main():
-    directory_path = "/Users/abdallah/Documents/work/Unily.AdvancedQueriesService/test/integration-tests/assets/raw-test-scripts/"
-    word = "jsonResponseFields:"
-    elements = get_user_input()
-    # word = get_user_input()
-    # directory_path = input("Enter the directory path to search: ")
-
-    files_has_word = get_files_has_entered_word(word, directory_path)
-    file_results = get_files_has_element_or_more(elements, files_has_word)
-
-    elements_in_files = print_elements_found(elements, file_results)
-    files_with_elements = print_files_with_elements(file_results)
-
-    # Summary of file names
-    print("\nSummary of elements within different files")
-    print(elements_in_files)
-
-    # Summary of file names
-    print("\nSummary of files containing at least one element:")
-    print(files_with_elements)
-
-    # Optionally return data if needed elsewhere in your application
-    return file_results
-
-
-if __name__ == "__main__":
-    main()
-
-# path: C:\Users\AbdallahHMAlazami\source\repos\Unily.AdvancedQueriesService\test\integration-tests\assets\raw-test-scripts
-# responss json fields not handled yet: author.profileUrl,organiser.profileUrl,location,metadata,openGraphSummary.content,openGraphSummary.results,siteOwners,sortOrder,topics,url.url,url.description,customMetadataSummary
-# new responss json fields  will be handled:
+    return printed_output, filenames
